@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>原材料</title>
+
+</head>
+<style lang="scss">
+    ::-webkit-scrollbar {
+        width: 0 !important;
+        height: 0;
+    }
+</style>
+<body>
+<div id="app">
+    <el-menu
+            :default-active="1"
+            class="el-menu-demo"
+            mode="horizontal"
+            background-color="#545c64"
+            text-color="#fff"
+            active-text-color="#ffd04b">
+        <el-menu-item index="1" @click="home">首页</el-menu-item>
+    </el-menu>
+    <el-container>
+        <el-aside width="250px">
+            <el-menu
+                    default-active="2-1"
+                    class="el-menu-vertical-demo"
+                    background-color="#545c64"
+                    text-color="#fff"
+                    active-text-color="#ffd04b">
+                <el-submenu index="1">
+                    <template slot="title">
+                        <i class="el-icon-s-tools"></i>
+                        <span>基础设置</span>
+                    </template>
+                    <el-menu-item-group>
+                        <el-menu-item index="1-1" @click="employee">职工管理</el-menu-item>
+                        <el-menu-item index="1-2">仓库管理</el-menu-item>
+                        <el-menu-item index="1-3">供应商管理</el-menu-item>
+                        <el-menu-item index="1-4">客户管理</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+                <el-submenu index="2">
+                    <template slot="title">
+                        <i class="el-icon-s-goods"></i>
+                        <span>库存明细</span>
+                    </template>
+                    <el-menu-item-group>
+                        <el-menu-item index="2-1">原料库</el-menu-item>
+                        <el-menu-item index="2-2">成品库</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+
+            </el-menu>
+        </el-aside>
+        <el-container>
+            <el-main style="padding: 0">
+                <!--按条件查询-->
+                <el-form :inline="true" :model="queryForm" class="demo-form-inline" style="height: 45px">
+                    <el-form-item label="原料编号:">
+                        <el-input v-model="queryForm.rawId" placeholder="原料编号" size="small"></el-input>
+                    </el-form-item>
+                    <el-form-item label="原料名称:">
+                        <el-input v-model="queryForm.rawName" placeholder="原料名称" size="small"></el-input>
+                    </el-form-item>
+                    <el-form-item label="所属仓库:">
+                        <el-input v-model="queryForm.wname" placeholder="所属仓库" size="small"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" size="small" @click="pageQuery" icon="el-icon-search">查询</el-button>
+                    </el-form-item>
+                </el-form>
+                <!--修改弹窗-->
+                <el-dialog title="修改原料信息" :visible.sync="UpdateFormVisible">
+                    <el-form :model="form">
+                        <el-form-item label="原料编号" :label-width="formLabelWidth">
+                            <el-input disabled v-model="form.rawId" autocomplete="off"></el-input>
+                        </el-form-item>
+                        <el-form-item label="原料名" :label-width="formLabelWidth">
+                            <el-input v-model="form.rawName" autocomplete="off"></el-input>
+                        </el-form-item>
+                        <el-form-item label="单格" :label-width="formLabelWidth">
+                            <el-input v-model="form.value" autocomplete="off"></el-input>
+                        </el-form-item>
+                        <el-form-item label="库存数量" :label-width="formLabelWidth">
+                            <el-input v-model="form.num" autocomplete="off"></el-input>
+                        </el-form-item>
+                        <el-form-item label="预警值" :label-width="formLabelWidth">
+                            <el-input v-model="form.warning" autocomplete="off"></el-input>
+                        </el-form-item>
+                        <el-form-item label="单位" :label-width="formLabelWidth">
+                            <el-input v-model="form.unit" autocomplete="off"></el-input>
+                        </el-form-item>
+                        <el-form-item label="所属仓库" :label-width="formLabelWidth">
+                            <el-select v-model="form.wname">
+                                <el-option v-for="ware in warehouse" v-bind:value="ware.wname">{{ware.wname}}</el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="UpdateFormVisible = false">取 消</el-button>
+                        <el-button type="primary" @click="update">确 定</el-button>
+                    </div>
+                </el-dialog>
+                <!-- 表格-->
+                <el-table
+                        :data="rawData"
+                        border
+                        style="width: 78%">
+                    <el-table-column
+                            fixed
+                            prop="wname"
+                            label="所属仓库"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="rawId"
+                            label="原料编号"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="rawName"
+                            label="原料名"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="value"
+                            label="单价"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="num"
+                            label="库存数量"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="warning"
+                            label="预警值"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="unit"
+                            label="单位"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            label="操作"
+                            width="150">
+                        <template slot-scope="scope">
+                            <el-button type="primary" icon="el-icon-edit" @click="openUpdateForm(scope.row)"
+                                       size="small"
+                                       circle></el-button>
+                            <el-button type="danger" icon="el-icon-delete" @click="remove(scope.row)" size="small"
+                                       circle></el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </el-main>
+            <el-footer>
+                <!--                分页-->
+                <el-pagination
+                        @current-change="handleCurrentChange"
+                        :current-page="pagination.current"
+                        :page-size=pagination.size
+                        layout="prev, pager, next, jumper"
+                        :total=pagination.total>
+                </el-pagination>
+            </el-footer>
+        </el-container>
+    </el-container>
+
+</div>
+</body>
+<script type="text/javascript" src="../static/js/vue.js"></script>
+<script type="text/javascript" src="../static/js/axios-0.18.0.js"></script>
+<link rel="stylesheet" href="../static/element-ui/lib/theme-chalk/index.css">
+<script src="../static/element-ui/lib/index.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            rawData: [],
+            AddFormVisible: false,//弹框是否可见
+            UpdateFormVisible: false,
+            formLabelWidth: '80px',//弹框宽度
+            form: {
+                id:'',
+                wname: '',
+                rawId: '',
+                rawName: '',
+                value: '',
+                num: '',
+                warning: '',
+                unit: '',
+            },
+            warehouse:[],
+            queryForm: {
+                rawId: '',
+                rawName: '',
+                wname: ''
+            },
+            //分页
+            pagination: {
+                total: '',
+                size: 10,
+                current: 1
+            },
+
+        },
+        created() {
+            this.pageQuery();
+        },
+        methods: {
+            handleCurrentChange(current) {
+                this.pagination.current = current
+                this.pageQuery()
+            },
+            //获取数据+条件查询
+            pageQuery() {
+                axios.get("/raw/pageQuery/" + this.pagination.current + "/" + this.pagination.size + '?' + 'rawId=' + this.queryForm.rawId
+                    + '&' + 'rawName=' + this.queryForm.rawName + '&' + 'wname=' + this.queryForm.wname).then((res) => {
+                    this.rawData = res.data.data.records
+                    this.pagination.current = res.data.data.current
+                    this.pagination.total = res.data.data.total
+                    this.pagination.size = res.data.data.size
+                })
+            },
+            //打开更新弹窗
+            openUpdateForm(row) {
+                this.form = row
+                this.UpdateFormVisible = true
+            },
+            //更新
+            update() {
+                axios.put("/raw/update", this.form).then((res) => {
+                    if (res.data.flag) {
+                        this.$message.success("修改成功")
+                    } else {
+                        this.$message.error("修改失败")
+                    }
+                    this.getWarehouse()
+                    this.pageQuery()
+                    this.UpdateFormVisible = false
+                })
+            },
+            //删除
+            remove(row) {
+                this.$confirm("此操作将永久删除数据", "提示", {type: "info"}).then(() => {
+                    axios.delete("/raw/delete/" + row.rawId).then((res) => {
+                        if (res.data.flag) {
+                            this.$message.success("删除成功")
+                        } else {
+                            this.$message.error("删除失败")
+                        }
+                        this.pageQuery()
+                    })
+                })
+
+            },
+            getWarehouse(){
+                axios.get("/warehouse/getAll").then((res) => {
+                    this.warehouse = res.data.data
+                })
+            }
+
+
+        }
+    })
+</script>
+</html>

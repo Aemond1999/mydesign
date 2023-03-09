@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>销售出库</title>
+</head>
+<style lang="scss">
+    ::-webkit-scrollbar {
+        width: 0 !important;
+        height: 0;
+    }
+</style>
+<body>
+<div id="app">
+    <el-menu
+            class="el-menu-demo"
+            mode="horizontal"
+            @select="handleSelect"
+            background-color="#545c64"
+            text-color="#fff"
+            active-text-color="#ffd04b">
+        <el-row>
+            <el-col :span="2">
+                <el-menu-item index="1" @click="home">首页</el-menu-item>
+            </el-col>
+            <!--            <el-col :span="2">-->
+            <!--                <el-menu-item index="3" @click="home" th:text="${session.user.username}"></el-menu-item>-->
+            <!--            </el-col>-->
+        </el-row>
+    </el-menu>
+    <el-container>
+        <el-aside width="250px">
+            <el-menu
+                    default-active="2-1"
+                    class="el-menu-vertical-demo"
+                    background-color="#545c64"
+                    text-color="#fff"
+                    active-text-color="#ffd04b">
+                <el-submenu index="1">
+                    <template slot="title">
+                        <i class="el-icon-s-tools"></i>
+                        <span>基础设置</span>
+                    </template>
+                    <el-menu-item-group>
+                        <el-menu-item index="1-1" @click="employee">职工管理</el-menu-item>
+                        <el-menu-item index="1-2">仓库管理</el-menu-item>
+                        <el-menu-item index="1-3">供应商管理</el-menu-item>
+                        <el-menu-item index="1-4">客户管理</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+                <el-submenu index="2">
+                    <template slot="title">
+                        <i class="el-icon-s-goods"></i>
+                        <span>库存明细</span>
+                    </template>
+                    <el-menu-item-group>
+                        <el-menu-item index="2-1">原料库</el-menu-item>
+                        <el-menu-item index="2-2">成品库</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+                <el-submenu index="3">
+                    <template slot="title">
+                        <i class="el-icon-s-goods"></i>
+                        <span>入库管理</span>
+                    </template>
+                    <el-menu-item-group>
+                        <el-menu-item index="2-1">采购单添加</el-menu-item>
+                        <el-menu-item index="2-2">采购单管理</el-menu-item>
+                        <el-menu-item index="2-3">入库单添加</el-menu-item>
+                        <el-menu-item index="2-3">入库单管理</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+
+            </el-menu>
+        </el-aside>
+
+        <el-container>
+            <el-main style="padding: 30px;background-color: rgb(249, 249, 249);">
+                <el-form ref="form" :model="form" label-width="90px" style="width: 500px ">
+                    <el-form-item label="销售单号:">
+                        <el-input v-model="form.soId"></el-input>
+                    </el-form-item>
+                    <el-form-item label="客户:">
+                        <el-select v-model="form.cid" placeholder="请选择供应商">
+                            <el-option v-for="c in customer" v-bind:value="c.cid">{{c.cname}}</el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="开单日期:">
+                        <el-date-picker
+                                v-model="form.creationDate"
+                                type="date"
+                                placeholder="选择日期"
+                                format="yyyy 年 MM 月 dd 日"
+                                value-format="yyyy-MM-dd">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="出库仓库:">
+                        <el-select v-model="form.wname" placeholder="请选择仓库">
+                            <el-option v-for="house in warehouse" v-bind:value="house .wname">{{house.wname}}
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="销售单备注:">
+                        <el-input type="textarea" v-model="form.message"></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="制单人:">
+                        <el-select v-model="form.empId" placeholder="请选择制单人">
+                            <el-option v-for="emp in employee" v-bind:value="emp.empId">{{emp.empName}}</el-option>
+                        </el-select>
+                    </el-form-item>
+
+                    <el-form-item label="商品明细:">
+                        <el-button type="primary" icon="el-icon-circle-plus" @click="openProduct">添加商品</el-button>
+                    </el-form-item>
+                </el-form>
+                <el-dialog title="添加商品" :visible.sync="AddFormVisible">
+                    <el-table
+                            :data="product"
+                            border
+                            tooltip-effect="dark"
+                            @selection-change="handleSelectionChange"
+                            ref="multipleTable"
+                            style="width: 98%">
+                        <el-table-column
+                                type="selection"
+                                width="40">
+                        </el-table-column>
+                        <el-table-column
+                                prop="fpId"
+                                label="成品编号"
+                                width="130">
+                        </el-table-column>
+                        <el-table-column
+                                prop="fpName"
+                                label="成品名称"
+                                width="130">
+                        </el-table-column>
+                        <el-table-column
+                                prop="value"
+                                label="单价"
+                                width="130">
+                        </el-table-column>
+                        <el-table-column
+                                prop="unit"
+                                label="单位"
+                                width="130">
+                        </el-table-column>
+                        <el-table-column
+                                prop="num"
+                                label="当前库存"
+                                width="130">
+                        </el-table-column>
+                        <el-table-column
+                                prop="outnum"
+                                label="出库量"
+                                width="130">
+                            <template slot-scope="scope">
+                                <input type="text" v-model="scope.row.outnum"
+                                       style="border:1px deepskyblue;height: 30px;width: 80px">
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <div slot="footer" class="dialog-footer" style="text-align: left">
+                        <el-button @click="cancel">取 消</el-button>
+                        <el-button type="primary" @click="add">确 定</el-button>
+                    </div>
+                </el-dialog>
+                <el-table
+                        :data="form.detail"
+                        border
+                        style="width: 50%">
+                    <el-table-column
+                            prop="fpId"
+                            label="成品编号"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="fpName"
+                            label="成品名称"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="value"
+                            label="单价"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="outnum"
+                            label="出库量"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="unit"
+                            label="单位"
+                            width="150">
+                    </el-table-column>
+                </el-table>
+                <el-form>
+                    <el-form-item label="合计:">
+                        <el-input v-model="form.sum" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-button type="primary" icon="el-icon-success" @click="saveSalesOrders">生成订单</el-button>
+                </el-form>
+        </el-container>
+    </el-container>
+
+</div>
+</body>
+<script type="text/javascript" src="../static/js/vue.js"></script>
+<script type="text/javascript" src="../static/js/axios-0.18.0.js"></script>
+<link rel="stylesheet" href="../static/element-ui/lib/theme-chalk/index.css">
+<script src="../static/element-ui/lib/index.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            AddFormVisible: false,//弹框是否可见
+            formLabelWidth: '80px',//弹框宽度
+            form: {
+                soId: '',
+                cid: '',
+                creationDate: '',
+                sum: '',
+                deliveryDate: '',
+                status: false,
+                empId: '',
+                message: '',
+                wname: '',
+                detail: []
+            },
+            warehouse: [],
+            customer: [],
+            employee: [],
+            product: [],
+            chosen: []
+        },
+        created() {
+            this.getCustomer()
+            this.getWarehouse()
+            this.getEmployee()
+        },
+        methods: {
+            getWarehouse() {
+                axios.get("/warehouse/getAll").then((res) => {
+                    this.warehouse = res.data.data
+                })
+            },
+            getEmployee() {
+                axios.get("/employee/getByDept/" + "销售部").then((res) => {
+                    this.employee = res.data.data
+                })
+            },
+            getProduct() {
+                axios.get("/product/getByWname/" + this.form.wname).then((res) => {
+                    this.product = res.data.data
+                })
+            },
+            getCustomer() {
+                axios.get("/customer/getAll").then((res) => {
+                    this.customer = res.data.data
+                })
+
+            },
+            openProduct() {
+                this.AddFormVisible = true
+                this.getProduct()
+            },
+            handleSelectionChange(val) {
+                this.chosen = val;
+                console.log(this.chosen)
+            },
+            cancel() {
+                this.AddFormVisible = false
+                this.chosen = []
+            },
+            add() {
+                axios.post("/saleDetails/packing", this.chosen).then((res) => {
+                    this.form.detail = res.data.data
+                    this.AddFormVisible = false
+                    this.getSum()
+                    console.log(this.form)
+                })
+            },
+            getSum() {
+                let sum = 0
+                for (let i = 0; i < this.form.detail.length; i++) {
+                    sum += (this.form.detail[i].outnum * this.form.detail[i].value)
+                }
+                this.form.sum = sum
+            },
+            saveSalesOrders() {
+                axios.post("/so/add", this.form).then((res) => {
+                    if (res.data.flag) {
+                        this.$message.success("添加成功")
+                    } else {
+                        this.$message.error("添加失败")
+                    }
+                })
+            }
+
+
+        }
+    })
+</script>
+</html>

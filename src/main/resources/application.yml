@@ -1,0 +1,21 @@
+spring:
+  main:
+    banner-mode: off
+  datasource:
+    druid:
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/mydatabase?serverTimezone=UTC&characterEncoding=utf-8
+      username: root
+      password: 123123
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+  resources:
+    static-locations:  [classpath:/static/,classpath:/templates/]
+  mvc:
+    static-path-pattern: /static/**
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+server:
+  port: 80
