@@ -16,15 +16,18 @@ import java.util.List;
 @TableName("check_sheets")
 public class CheckSheets {
     @TableId
-    private String ckId;
+    private String csId;
     private String creationDate;
     private String checkDate;
     private Boolean status;
     private Integer originalNum;
     private Integer realNum;
+    private String message;
     private String empId;
     private String wname;
+    @TableField("profit_and_loss")
+    private Integer profitAndLoss;
     @TableField(exist = false)
-    private List<SalesOrdersDetails> detail;
+    private List<CheckSheetsDetails>  detail;
 
 }

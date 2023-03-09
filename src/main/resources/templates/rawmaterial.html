@@ -10,6 +10,13 @@
         width: 0 !important;
         height: 0;
     }
+    .el-table .warning-row {
+        background: oldlace;
+    }
+
+    .el-table .success-row {
+        background: #f0f9eb;
+    }
 </style>
 <body>
 <div id="app">
@@ -95,7 +102,8 @@
                         </el-form-item>
                         <el-form-item label="所属仓库" :label-width="formLabelWidth">
                             <el-select v-model="form.wname">
-                                <el-option v-for="ware in warehouse" v-bind:value="ware.wname">{{ware.wname}}</el-option>
+                                <el-option v-for="ware in warehouse" v-bind:value="ware.wname">{{ware.wname}}
+                                </el-option>
                             </el-select>
                         </el-form-item>
                     </el-form>
@@ -108,7 +116,8 @@
                 <el-table
                         :data="rawData"
                         border
-                        style="width: 78%">
+                        :row-class-name="tableRowClassName">
+                    style="width: 78%">
                     <el-table-column
                             fixed
                             prop="wname"
@@ -186,7 +195,7 @@
             UpdateFormVisible: false,
             formLabelWidth: '80px',//弹框宽度
             form: {
-                id:'',
+                id: '',
                 wname: '',
                 rawId: '',
                 rawName: '',
@@ -195,7 +204,7 @@
                 warning: '',
                 unit: '',
             },
-            warehouse:[],
+            warehouse: [],
             queryForm: {
                 rawId: '',
                 rawName: '',
@@ -207,6 +216,13 @@
                 size: 10,
                 current: 1
             },
+            tableRowClassName({row, rowIndex}) {
+                if (row.warning > row.num) {
+                    return 'warning-row';
+                } else {
+                    return 'success-row';
+                }
+            }
 
         },
         created() {
@@ -259,7 +275,7 @@
                 })
 
             },
-            getWarehouse(){
+            getWarehouse() {
                 axios.get("/warehouse/getAll").then((res) => {
                     this.warehouse = res.data.data
                 })

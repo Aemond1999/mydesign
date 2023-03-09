@@ -9,6 +9,10 @@
         width: 0 !important;
         height: 0;
     }
+
+    .single-select-table thead .el-table-column--selection .cell {
+        display: none;
+    }
 </style>
 <body>
 <div id="app">
@@ -78,7 +82,7 @@
             <el-main style="padding: 10px;background-color: rgb(249, 249, 249);">
                 <el-form :inline="true" :model="queryForm" class="demo-form-inline">
                     <el-form-item label="单据编号:">
-                        <el-input v-model="queryForm.soId" placeholder="单据编号" size="small"></el-input>
+                        <el-input v-model="queryForm.csId" placeholder="单据编号" size="small"></el-input>
                     </el-form-item>
                     <el-form-item label="盘点仓库:">
                         <el-input v-model="queryForm.wname" placeholder="仓库" size="small"></el-input>
@@ -89,12 +93,18 @@
                 </el-form>
                 <el-button type="primary" icon="el-icon-circle-plus" @click="openProduct">新增盘点单</el-button>
                 <el-dialog :visible.sync="AddFormVisible">
-                    <el-form :inline="true" :model="queryForm" class="demo-form-inline">
+                    <el-form :inline="true" :model="form" class="demo-form-inline">
                         <el-form-item label="单据编号:" :label-width="formLabelWidth">
-                            <el-input v-model="queryForm.fpId" placeholder="成品编号" size="small"></el-input>
+                            <el-input v-model="form.csId" placeholder="单据编号" size="small"></el-input>
                         </el-form-item>
                         <el-form-item label="单据日期:" :label-width="formLabelWidth">
-                            <el-input v-model="queryForm.fpName" placeholder="成品名称" size="small"></el-input>
+                            <el-date-picker
+                                    v-model="form.creationDate"
+                                    type="date"
+                                    placeholder="选择日期"
+                                    format="yyyy 年 MM 月 dd 日"
+                                    value-format="yyyy-MM-dd">
+                            </el-date-picker>
                         </el-form-item>
                         <el-form-item label="盘点仓库:" :label-width="formLabelWidth">
                             <el-select v-model="form.wname" placeholder="请选择仓库" style="width: 200px">
@@ -110,15 +120,14 @@
                             </el-select>
                         </el-form-item>
                         <el-form-item label="备注:" :label-width="formLabelWidth">
-                            <el-input v-model="queryForm.fpName" placeholder="成品名称" size="small"></el-input>
+                            <el-input v-model="form.message" size="small"></el-input>
                         </el-form-item>
                     </el-form>
                     <el-button type="primary" icon="el-icon-circle-plus" @click="openGoods">新增</el-button>
                     <el-table
-                            :data="product"
+                            :data="chosenProduct"
                             border
                             tooltip-effect="dark"
-                            ref="multipleTable"
                             style="width: 70%">
                         <el-table-column
                                 prop="fpId"
@@ -142,26 +151,32 @@
                         </el-table-column>
                         <el-table-column
                                 prop="num"
-                                label="当前库存"
+                                label="库存"
                                 width="130">
                         </el-table-column>
                     </el-table>
+                    <el-form>
+                        <el-form-item label="实际库存:">
+                            <el-input v-model="form.realNum" @change="count" style="width: 150px"
+                                      placeholder="请输入实际库存"></el-input>
+                        </el-form-item>
+                        <el-form-item label="盈亏库存:">
+                            <el-input v-model="form.profitAndLoss" style="width: 150px"></el-input>
+                        </el-form-item>
+                    </el-form>
                     <div slot="footer" class="dialog-footer" style="text-align: left">
                         <el-button @click="cancel">取 消</el-button>
                         <el-button type="primary" @click="add">确 定</el-button>
                     </div>
-
-
                     <!-- 嵌套对话框-->
-
                     <el-dialog :visible.sync="GoodsFormVisible" width="40%">
-
                         <el-table
                                 :data="product"
                                 border
+                                class="single-select-table"
                                 tooltip-effect="dark"
                                 @selection-change="handleSelectionChange"
-                                ref="multipleTable"
+                                ref="table"
                                 style="width: 95%">
                             <el-table-column
                                     type="selection"
@@ -189,58 +204,122 @@
                             </el-table-column>
                             <el-table-column
                                     prop="num"
-                                    label="当前库存"
+                                    label="库存"
                                     width="130">
                             </el-table-column>
                         </el-table>
+                        <div slot="footer" class="dialog-footer" style="text-align: left">
+                            <el-button @click="cancel2">取 消</el-button>
+                            <el-button type="primary" @click="add2">确 定</el-button>
+                        </div>
                     </el-dialog>
                 </el-dialog>
 
+
+
+                <el-dialog :visible.sync="InfoVisible">
+                    <el-descriptions title="盘点明细" direction="vertical" :column="4" border>
+                        <el-descriptions-item label="单据编号" :span="1">{{info.csId}}</el-descriptions-item>
+                        <el-descriptions-item label="盘点人员" :span="1">{{info.empId}}</el-descriptions-item>
+                        <el-descriptions-item label="原始库存" :span="1">{{info.originalNum}}</el-descriptions-item>
+                        <el-descriptions-item label="实际库存" :span="1">{{info.realNum}}</el-descriptions-item>
+                        <el-descriptions-item label="盈亏库存" :span="1">{{info.profitAndLoss}}</el-descriptions-item>
+                        <el-descriptions-item label="状态" :span="1">{{isStore}}</el-descriptions-item>
+                        <el-descriptions-item label="盘点仓库" :span="1">{{info.wname}}</el-descriptions-item>
+                        <el-descriptions-item label="制单日期" :span="1">{{info.creationDate}}</el-descriptions-item>
+                        <el-descriptions-item label="盘点日期" :span="1">{{info.checkDate}}</el-descriptions-item>
+                    </el-descriptions>
+                    <el-table
+                            :data="info.detail"
+                            border
+                            tooltip-effect="dark"
+                            style="width: 70%">
+                        <el-table-column
+                                prop="fpId"
+                                label="物料编号"
+                                width="130">
+                        </el-table-column>
+                        <el-table-column
+                                prop="fpName"
+                                label="物料名称"
+                                width="130">
+                        </el-table-column>
+                        <el-table-column
+                                prop="value"
+                                label="单价"
+                                width="130">
+                        </el-table-column>
+                        <el-table-column
+                                prop="unit"
+                                label="单位"
+                                width="130">
+                        </el-table-column>
+                        <el-table-column
+                                prop="num"
+                                label="库存"
+                                width="130">
+                        </el-table-column>
+                    </el-table>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="InfoVisible= false">取 消</el-button>
+                    </div>
+                </el-dialog>
                 <el-table
-                        :data="form.detail"
+                        :data="csData"
                         border
-                        style="width: 55%">
+                        style="width: 100%">
                     <el-table-column
-                            prop="fpId"
+                            prop="csId"
                             label="单据编号"
                             width="150">
                     </el-table-column>
                     <el-table-column
-                            prop="fpName"
+                            prop="creationDate"
                             label="单据日期"
                             width="150">
                     </el-table-column>
                     <el-table-column
-                            prop="fpName"
+                            prop="checkDate"
+                            label="盘点日期"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="wname"
                             label="仓库"
                             width="150">
                     </el-table-column>
                     <el-table-column
-                            prop="unit"
+                            prop="empId"
                             label="盘点人员"
                             width="150">
                     </el-table-column>
                     <el-table-column
-                            prop="unit"
+                            prop="status"
                             label="单据状态"
                             width="150">
+                        <template slot-scope="scope">
+                            <el-switch
+                                    v-model="scope.row.status"
+                                    active-color="#13ce66"
+                                    inactive-color="#ff4949">
+                            </el-switch>
+                        </template>
                     </el-table-column>
                     <el-table-column
                             label="操作"
-                            width="150">
+                            width="200">
                         <template slot-scope="scope">
                             <el-button type="primary" @click="openInfoForm(scope.row)"
                                        size="small"
                             >详情
                             </el-button>
-                            <el-button type="primary" @click="push(scope.row)"
+                            <el-button type="primary" @click="checkConfirm(scope.row)"
                                        size="small"
                             >盘点确认
                             </el-button>
                         </template>
                     </el-table-column>
                 </el-table>
-
                 <el-footer>
                     <!-- 分页-->
                     <el-pagination
@@ -251,6 +330,8 @@
                             :total=pagination.total>
                     </el-pagination>
                 </el-footer>
+
+
         </el-container>
 
 
@@ -260,29 +341,35 @@
 </body>
 <script type="text/javascript" src="../static/js/vue.js"></script>
 <script type="text/javascript" src="../static/js/axios-0.18.0.js"></script>
-<link rel="stylesheet" href="../static/element-ui/lib/theme-chalk/index.css">
-<script src="../static/element-ui/lib/index.js"></script>
+<!-- 引入样式 -->
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script>
+
     new Vue({
         el: '#app',
         data: {
             AddFormVisible: false,//弹框是否可见
             GoodsFormVisible: false,//弹框是否可见
+            InfoVisible: false,
             formLabelWidth: '80px',//弹框宽度
+            csData: [],
             form: {
-                soId: '',
-                cid: '',
+                csId: '',
                 creationDate: '',
                 checkDate: '',
                 status: false,
                 empId: '',
                 message: '',
                 wname: '',
+                profitAndLoss: '',
+                originalNum: '',
+                realNum: '',
                 detail: []
             },
             queryForm: {
-                rawId: '',
-                rawName: '',
+                csId: '',
                 wname: ''
             },
             //分页
@@ -294,13 +381,38 @@
             warehouse: [],
             employee: [],
             product: [],
-            chosen: []
+            info: {
+                csId: '',
+                creationDate: '',
+                checkDate: '',
+                status: false,
+                empId: '',
+                message: '',
+                wname: '',
+                profitAndLoss: '',
+                originalNum: '',
+                realNum: '',
+                detail: []
+            },
+            chosen: [],
+            chosenProduct: [],
+            isStore: ''
         },
         created() {
             this.getWarehouse()
             this.getEmployee()
+            this. pageQuery()
         },
         methods: {
+            pageQuery() {
+                axios.get("/check/pageQuery/" + this.pagination.current + "/" + this.pagination.size + '?' + 'csId=' + this.queryForm.csId
+                    + '&' + 'wname=' + this.queryForm.wname).then((res) => {
+                    this.csData = res.data.data.records
+                    this.pagination.current = res.data.data.current
+                    this.pagination.total = res.data.data.total
+                    this.pagination.size = res.data.data.size
+                })
+            },
             getWarehouse() {
                 axios.get("/warehouse/getAll").then((res) => {
                     this.warehouse = res.data.data
@@ -325,29 +437,66 @@
                 this.getProduct()
             },
             handleSelectionChange(val) {
-                this.chosen = val;
-                console.log(this.chosen)
+
+                if (val.length > 1) {
+                    this.$refs.selectTable.clearSelection()
+                    this.$refs.selectTable.toggleRowSelection(val.pop())
+                } else {
+                    this.chosen = val;
+                }
             },
             cancel() {
+                this.chosenProduct = []
+                this.chosen=[]
+                this.form = {}
                 this.AddFormVisible = false
-                this.chosen = []
+
             },
             add() {
-                axios.post("/saleDetails/packing", this.chosen).then((res) => {
-                    this.form.detail = res.data.data
-                    this.AddFormVisible = false
-                    this.getSum()
-                    console.log(this.form)
-                })
-            },
-            saveSalesOrders() {
-                axios.post("/so/add", this.form).then((res) => {
+                this.form.detail=this.chosenProduct
+                axios.post("/check/add", this.form).then((res) => {
                     if (res.data.flag) {
                         this.$message.success("添加成功")
                     } else {
                         this.$message.error("添加失败")
                     }
+                    this.AddFormVisible=false
+                    this. pageQuery()
                 })
+            },
+            checkConfirm(row) {
+                this.form=row
+                axios.post("/check/pullOrPush", this.form).then((res) => {
+                    if (res.data.flag) {
+                        this.$message.success("添加成功")
+                    } else {
+                        this.$message.error("添加失败")
+                    }
+                    this. pageQuery()
+                })
+            },
+            cancel2() {
+                this.GoodsFormVisible = false
+                this.product = []
+                this.chosenProduct = []
+            },
+            add2() {
+                this.chosenProduct = this.chosen
+                this.GoodsFormVisible = false
+
+            },
+            count() {
+                console.log(this.chosenProduct)
+                this.form.profitAndLoss = this.form.realNum-this.chosenProduct[0].num
+            },
+            openInfoForm(row) {
+                this.info = row
+                if (this.info.status) {
+                    this.isStore = '已入库'
+                } else {
+                    this.isStore = '未入库'
+                }
+                this.InfoVisible = true
             }
 
 

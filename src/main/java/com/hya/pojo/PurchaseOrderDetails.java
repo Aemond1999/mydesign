@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Data
 @NoArgsConstructor
-@TableName(value = "purchase_orders_detail")
+@TableName(value = "purchase_orders_details")
 public class PurchaseOrderDetails   {
     private String poId;
     private String rawId;

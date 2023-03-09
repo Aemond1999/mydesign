@@ -70,4 +70,8 @@ public class PageController {
     public String toSalesOrders() {
         return "salesorders";
     }
+    @RequestMapping("/toCheck")
+    public String toCheck() {
+        return "checksheets";
+    }
 }
