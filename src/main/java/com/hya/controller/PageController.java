@@ -42,7 +42,7 @@ public class PageController {
 
     @RequestMapping("/toWarehouse")
     public String toWarehouse() {
-        return "role";
+        return "warehouse";
     }
 
     @RequestMapping("/toProvider")

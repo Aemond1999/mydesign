@@ -25,7 +25,7 @@
     <el-container>
         <el-aside width="250px">
             <el-menu
-                    default-active="2-2"
+                    default-active="4-2"
                     class="el-menu-vertical-demo"
                     background-color="#545c64"
                     text-color="#fff"
@@ -36,35 +36,53 @@
                         <span>基础设置</span>
                     </template>
                     <el-menu-item-group>
-                        <el-menu-item index="1-1" @click="employee">职工管理</el-menu-item>
-                        <el-menu-item index="1-2">仓库管理</el-menu-item>
-                        <el-menu-item index="1-3">供应商管理</el-menu-item>
-                        <el-menu-item index="1-4">客户管理</el-menu-item>
+                        <el-menu-item index="1-1" @click="toEmployee">职工管理</el-menu-item>
+                        <el-menu-item index="1-2" @click="toWarehouse">仓库管理</el-menu-item>
+                        <el-menu-item index="1-3" @click="toProvider">供应商管理</el-menu-item>
+                        <el-menu-item index="1-4" @click="toCustomer">客户管理</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
                 <el-submenu index="2">
                     <template slot="title">
                         <i class="el-icon-s-goods"></i>
-                        <span>库存明细</span>
+                        <span>库存管理</span>
                     </template>
                     <el-menu-item-group>
-                        <el-menu-item index="2-1">原料库</el-menu-item>
-                        <el-menu-item index="2-2">成品库</el-menu-item>
+                        <el-menu-item index="2-1" @click="toRawMaterials">原料库</el-menu-item>
+                        <el-menu-item index="2-2" @click="toProduct">成品库</el-menu-item>
+                        <el-menu-item index="2-3" @click="toCheck">库存盘点</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
                 <el-submenu index="3">
                     <template slot="title">
-                        <i class="el-icon-s-goods"></i>
-                        <span>入库管理</span>
+                        <i class="el-icon-s-order"></i>
+                        <span>采购管理</span>
                     </template>
                     <el-menu-item-group>
-                        <el-menu-item index="2-1">采购单添加</el-menu-item>
-                        <el-menu-item index="2-2">采购单管理</el-menu-item>
-                        <el-menu-item index="2-3">入库单添加</el-menu-item>
-                        <el-menu-item index="2-3">入库单管理</el-menu-item>
+                        <el-menu-item @click="toPurchase" index="3-1">采购单添加</el-menu-item>
+                        <el-menu-item index="3-2" @click="toPurchaseOrders">采购单管理</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
-
+                <el-submenu index="4">
+                    <template slot="title">
+                        <i class="el-icon-money"></i>
+                        <span>销售管理</span>
+                    </template>
+                    <el-menu-item-group>
+                        <el-menu-item @click="toSale" index="4-1">销售单添加</el-menu-item>
+                        <el-menu-item index="4-2" @click="toSaleOrders">销售单管理</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+                <el-submenu index="5">
+                    <template slot="title">
+                        <i class="el-icon-user-solid"></i>
+                        <span>系统管理</span>
+                    </template>
+                    <el-menu-item-group>
+                        <el-menu-item @click="toRole" index="5-1">角色管理</el-menu-item>
+                        <el-menu-item @click="toUser" index="5-2">用户管理</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
             </el-menu>
         </el-aside>
         <el-container>
@@ -284,7 +302,50 @@
                     this.pageQuery()
                 })
             }
-
+            ,
+            //跳转
+            toHomepage() {
+                document.location = "http://localhost/toHomepage"
+            },
+            toPurchase() {
+                document.location = "http://localhost/toPurchase"
+            },
+            toWarehouse() {
+                document.location = "http://localhost/toWarehouse"
+            },
+            toProvider() {
+                document.location = "http://localhost/toProvider"
+            },
+            toProduct() {
+                document.location = "http://localhost/toProduct"
+            },
+            toPurchaseOrders() {
+                document.location = "http://localhost/toPurchaseOrders"
+            },
+            toRawMaterials() {
+                document.location = "http://localhost/toRawMaterials"
+            },
+            toEmployee() {
+                document.location = "http://localhost/toEmployee"
+            },
+            toCustomer() {
+                document.location = "http://localhost/toCustomer"
+            },
+            toCheck() {
+                document.location = "http://localhost/toCheck"
+            },
+            toRole() {
+                document.location = "http://localhost/toRole"
+            },
+            toUser() {
+                document.location = "http://localhost/toUser"
+            },
+            toSale() {
+                document.location = "http://localhost/toSale"
+            },
+            toSaleOrders() {
+                document.location = "http://localhost/toSalesOrders"
+            }
         }
     })
 </script>

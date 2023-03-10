@@ -60,7 +60,7 @@
                     <el-menu-item-group>
                         <el-menu-item index="2-1" @click="toRawMaterials">原料库</el-menu-item>
                         <el-menu-item index="2-2" @click="toProduct">成品库</el-menu-item>
-                        <el-menu-item index="2-3" @click="toProduct">库存盘点</el-menu-item>
+                        <el-menu-item index="2-3" @click="toCheck">库存盘点</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
                 <el-submenu index="3">
@@ -79,8 +79,8 @@
                         <span>销售管理</span>
                     </template>
                     <el-menu-item-group>
-                        <el-menu-item @click="toPurchase" index="2-1">销售单添加</el-menu-item>
-                        <el-menu-item index="2-2" @click="toPurchaseOrders">销售单管理</el-menu-item>
+                        <el-menu-item @click="toSale" index="4-1">销售单添加</el-menu-item>
+                        <el-menu-item index="4-2" @click="toSaleOrders">销售单管理</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
                 <el-submenu index="5">
@@ -89,13 +89,13 @@
                         <span>系统管理</span>
                     </template>
                     <el-menu-item-group>
-                        <el-menu-item @click="toPurchase" index="5-1">角色管理</el-menu-item>
-                        <el-menu-item @click="toPurchase" index="5-2">用户管理</el-menu-item>
+                        <el-menu-item @click="toRole" index="5-1">角色管理</el-menu-item>
+                        <el-menu-item @click="toUser" index="5-2">用户管理</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
             </el-menu>
         </el-aside>
-        <el-main       >
+        <el-main>
         </el-main>
     </el-container>
 </div>
@@ -124,6 +124,26 @@
             }
         },
         methods: {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            //跳转
             toHomepage() {
                 document.location = "http://localhost/toHomepage"
             },
@@ -150,6 +170,21 @@
             },
             toCustomer() {
                 document.location = "http://localhost/toCustomer"
+            },
+            toCheck() {
+                document.location = "http://localhost/toCheck"
+            },
+            toRole() {
+                document.location = "http://localhost/toRole"
+            },
+            toUser() {
+                document.location = "http://localhost/toUser"
+            },
+            toSale(){
+                document.location = "http://localhost/toSale"
+            },
+            toSaleOrders(){
+                document.location = "http://localhost/toSalesOrders"
             }
         }
     })

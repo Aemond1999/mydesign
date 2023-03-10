@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>销售出库</title>
+    <title>库存盘点</title>
 </head>
 <style lang="scss">
     ::-webkit-scrollbar {
@@ -25,17 +25,17 @@
             active-text-color="#ffd04b">
         <el-row>
             <el-col :span="2">
-                <el-menu-item index="1" @click="home">首页</el-menu-item>
+                <el-menu-item index="1" @click="toHomepage">首页</el-menu-item>
             </el-col>
-            <!--            <el-col :span="2">-->
-            <!--                <el-menu-item index="3" @click="home" th:text="${session.user.username}"></el-menu-item>-->
-            <!--            </el-col>-->
+            <el-col :span="2" :offset="20">
+                <el-menu-item index="3" th:text="${session.user.userName}"></el-menu-item>
+            </el-col>
         </el-row>
     </el-menu>
     <el-container>
         <el-aside width="250px">
             <el-menu
-                    default-active="2-1"
+                    default-active="2-3"
                     class="el-menu-vertical-demo"
                     background-color="#545c64"
                     text-color="#fff"
@@ -46,38 +46,55 @@
                         <span>基础设置</span>
                     </template>
                     <el-menu-item-group>
-                        <el-menu-item index="1-1" @click="employee">职工管理</el-menu-item>
-                        <el-menu-item index="1-2">仓库管理</el-menu-item>
-                        <el-menu-item index="1-3">供应商管理</el-menu-item>
-                        <el-menu-item index="1-4">客户管理</el-menu-item>
+                        <el-menu-item index="1-1" @click="toEmployee">职工管理</el-menu-item>
+                        <el-menu-item index="1-2" @click="toWarehouse">仓库管理</el-menu-item>
+                        <el-menu-item index="1-3" @click="toProvider">供应商管理</el-menu-item>
+                        <el-menu-item index="1-4" @click="toCustomer">客户管理</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
                 <el-submenu index="2">
                     <template slot="title">
                         <i class="el-icon-s-goods"></i>
-                        <span>库存明细</span>
+                        <span>库存管理</span>
                     </template>
                     <el-menu-item-group>
-                        <el-menu-item index="2-1">原料库</el-menu-item>
-                        <el-menu-item index="2-2">成品库</el-menu-item>
+                        <el-menu-item index="2-1" @click="toRawMaterials">原料库</el-menu-item>
+                        <el-menu-item index="2-2" @click="toProduct">成品库</el-menu-item>
+                        <el-menu-item index="2-3" @click="toCheck">库存盘点</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
                 <el-submenu index="3">
                     <template slot="title">
-                        <i class="el-icon-s-goods"></i>
-                        <span>入库管理</span>
+                        <i class="el-icon-s-order"></i>
+                        <span>采购管理</span>
                     </template>
                     <el-menu-item-group>
-                        <el-menu-item index="2-1">采购单添加</el-menu-item>
-                        <el-menu-item index="2-2">采购单管理</el-menu-item>
-                        <el-menu-item index="2-3">入库单添加</el-menu-item>
-                        <el-menu-item index="2-3">入库单管理</el-menu-item>
+                        <el-menu-item @click="toPurchase" index="3-1">采购单添加</el-menu-item>
+                        <el-menu-item index="3-2" @click="toPurchaseOrders">采购单管理</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
-
+                <el-submenu index="4">
+                    <template slot="title">
+                        <i class="el-icon-money"></i>
+                        <span>销售管理</span>
+                    </template>
+                    <el-menu-item-group>
+                        <el-menu-item @click="toSale" index="4-1">销售单添加</el-menu-item>
+                        <el-menu-item index="4-2" @click="toSaleOrders">销售单管理</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+                <el-submenu index="5">
+                    <template slot="title">
+                        <i class="el-icon-user-solid"></i>
+                        <span>系统管理</span>
+                    </template>
+                    <el-menu-item-group>
+                        <el-menu-item @click="toRole" index="5-1">角色管理</el-menu-item>
+                        <el-menu-item @click="toUser" index="5-2">用户管理</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
             </el-menu>
         </el-aside>
-
         <el-container>
             <el-main style="padding: 10px;background-color: rgb(249, 249, 249);">
                 <el-form :inline="true" :model="queryForm" class="demo-form-inline">
@@ -216,7 +233,6 @@
                 </el-dialog>
 
 
-
                 <el-dialog :visible.sync="InfoVisible">
                     <el-descriptions title="盘点明细" direction="vertical" :column="4" border>
                         <el-descriptions-item label="单据编号" :span="1">{{info.csId}}</el-descriptions-item>
@@ -333,10 +349,7 @@
 
 
         </el-container>
-
-
     </el-container>
-
 </div>
 </body>
 <script type="text/javascript" src="../static/js/vue.js"></script>
@@ -346,7 +359,6 @@
 <!-- 引入组件库 -->
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script>
-
     new Vue({
         el: '#app',
         data: {
@@ -401,7 +413,7 @@
         created() {
             this.getWarehouse()
             this.getEmployee()
-            this. pageQuery()
+            this.pageQuery()
         },
         methods: {
             pageQuery() {
@@ -447,32 +459,32 @@
             },
             cancel() {
                 this.chosenProduct = []
-                this.chosen=[]
+                this.chosen = []
                 this.form = {}
                 this.AddFormVisible = false
 
             },
             add() {
-                this.form.detail=this.chosenProduct
+                this.form.detail = this.chosenProduct
                 axios.post("/check/add", this.form).then((res) => {
                     if (res.data.flag) {
                         this.$message.success("添加成功")
                     } else {
                         this.$message.error("添加失败")
                     }
-                    this.AddFormVisible=false
-                    this. pageQuery()
+                    this.AddFormVisible = false
+                    this.pageQuery()
                 })
             },
             checkConfirm(row) {
-                this.form=row
+                this.form = row
                 axios.post("/check/pullOrPush", this.form).then((res) => {
                     if (res.data.flag) {
                         this.$message.success("添加成功")
                     } else {
                         this.$message.error("添加失败")
                     }
-                    this. pageQuery()
+                    this.pageQuery()
                 })
             },
             cancel2() {
@@ -487,7 +499,7 @@
             },
             count() {
                 console.log(this.chosenProduct)
-                this.form.profitAndLoss = this.form.realNum-this.chosenProduct[0].num
+                this.form.profitAndLoss = this.form.realNum - this.chosenProduct[0].num
             },
             openInfoForm(row) {
                 this.info = row
@@ -497,6 +509,51 @@
                     this.isStore = '未入库'
                 }
                 this.InfoVisible = true
+            }
+
+            ,
+            //跳转
+            toHomepage() {
+                document.location = "http://localhost/toHomepage"
+            },
+            toPurchase() {
+                document.location = "http://localhost/toPurchase"
+            },
+            toWarehouse() {
+                document.location = "http://localhost/toWarehouse"
+            },
+            toProvider() {
+                document.location = "http://localhost/toProvider"
+            },
+            toProduct() {
+                document.location = "http://localhost/toProduct"
+            },
+            toPurchaseOrders() {
+                document.location = "http://localhost/toPurchaseOrders"
+            },
+            toRawMaterials() {
+                document.location = "http://localhost/toRawMaterials"
+            },
+            toEmployee() {
+                document.location = "http://localhost/toEmployee"
+            },
+            toCustomer() {
+                document.location = "http://localhost/toCustomer"
+            },
+            toCheck() {
+                document.location = "http://localhost/toCheck"
+            },
+            toRole() {
+                document.location = "http://localhost/toRole"
+            },
+            toUser() {
+                document.location = "http://localhost/toUser"
+            },
+            toSale() {
+                document.location = "http://localhost/toSale"
+            },
+            toSaleOrders() {
+                document.location = "http://localhost/toSalesOrders"
             }
 
 
