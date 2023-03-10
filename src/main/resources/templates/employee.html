@@ -24,8 +24,8 @@
             <el-col :span="2">
                 <el-menu-item index="1" @click="toHomepage">首页</el-menu-item>
             </el-col>
-            <el-col :span="2" :offset="20">
-                <el-menu-item index="3" th:text="${session.user.userName}"></el-menu-item>
+            <el-col :span="1" :offset="20">
+                <el-menu-item index="1" @click="quit">注销</el-menu-item>
             </el-col>
         </el-row>
     </el-menu>
@@ -364,6 +364,8 @@
             },
             toSaleOrders() {
                 document.location = "http://localhost/toSalesOrders"
+            } ,   quit(){
+                document.location="http://localhost/toLogin"
             }
 
         }
