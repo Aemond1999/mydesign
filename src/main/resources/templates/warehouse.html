@@ -211,6 +211,9 @@
             this.getAll();
         },
         methods: {
+            reset(){
+                this.form={}
+            },
             //获取数据
             getAll() {
                 axios.get("/warehouse/getAll").then((res) => {
@@ -251,6 +254,7 @@
             //打开新增弹窗
             openAddForm() {
                 this.AddFormVisible = true
+                this.reset()
             },
             //新增
             add() {

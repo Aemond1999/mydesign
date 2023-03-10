@@ -255,6 +255,9 @@
             this.getAll();
         },
         methods: {
+            reset(){
+                this.form={}
+            },
             //获取数据
             getAll() {
                 axios.get("/employee/getAll").then((res) => {
@@ -297,6 +300,7 @@
             openAddForm() {
                 this.AddFormVisible= true
                 this.getDept()
+                this.reset()
             },
             //新增
             add() {

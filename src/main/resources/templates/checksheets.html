@@ -478,14 +478,17 @@
             },
             checkConfirm(row) {
                 this.form = row
-                axios.post("/check/pullOrPush", this.form).then((res) => {
-                    if (res.data.flag) {
-                        this.$message.success("添加成功")
-                    } else {
-                        this.$message.error("添加失败")
-                    }
-                    this.pageQuery()
+                this.$confirm("确认盘点？", "提示", {type: "info"}).then(() => {
+                    axios.post("/check/pullOrPush", this.form).then((res) => {
+                        if (res.data.flag) {
+                            this.$message.success("添加成功")
+                        } else {
+                            this.$message.error("添加失败")
+                        }
+                        this.pageQuery()
+                    })
                 })
+
             },
             cancel2() {
                 this.GoodsFormVisible = false
@@ -504,9 +507,9 @@
             openInfoForm(row) {
                 this.info = row
                 if (this.info.status) {
-                    this.isStore = '已入库'
+                    this.isStore = '已调整'
                 } else {
-                    this.isStore = '未入库'
+                    this.isStore = '未调整'
                 }
                 this.InfoVisible = true
             }

@@ -236,6 +236,9 @@
             this.getAll();
         },
         methods: {
+            reset(){
+                this.form={}
+            },
             //获取数据
             getAll() {
                 axios.get("/customer/getAll").then((res) => {
@@ -275,6 +278,7 @@
             },
             //打开新增弹窗
             openAddForm() {
+                this.reset()
                 this.AddFormVisible = true
             },
             //新增

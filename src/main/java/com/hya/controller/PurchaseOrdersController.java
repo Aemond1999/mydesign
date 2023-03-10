@@ -71,7 +71,19 @@ public class PurchaseOrdersController {
             r.setWname(po.getWname());
             rawMaterials.add(r);
         }
-        if (rawMaterialService.saveOrUpdateBatch(rawMaterials)) {
+        boolean flag = false;
+        for (RawMaterial rawMaterial : rawMaterials) {
+            RawMaterial one = rawMaterialService.getOne(new QueryWrapper<RawMaterial>().eq("raw_id", rawMaterial.getRawId()).
+                    eq("wname", rawMaterial.getWname()));
+            if (one != null) {
+                rawMaterial.setNum(one.getNum() + rawMaterial.getNum());
+                flag = rawMaterialService.update(rawMaterial, new QueryWrapper<RawMaterial>().eq("raw_id", rawMaterial.getRawId()).
+                        eq("wname", rawMaterial.getWname()));
+            } else {
+                flag = rawMaterialService.save(rawMaterial);
+            }
+        }
+        if (flag) {
             //设置入库日期
             Calendar calendar = Calendar.getInstance();
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -81,7 +93,7 @@ public class PurchaseOrdersController {
             po.setStatus(true);
             queryWrapper.eq("po_id", po.getPoId());
             purchaseOrdersService.update(po, queryWrapper);
-            return new R(rawMaterialService.saveOrUpdateBatch(rawMaterials));
+            return new R(true);
         } else {
             return new R(false);
         }

@@ -152,7 +152,7 @@
                 <el-table
                         :data="soData"
                         border
-                        style="width: 51%">
+                        style="width:100%">
                     <el-table-column
                             fixed
                             prop="soId"
@@ -293,14 +293,17 @@
                 })
             },
             push(row) {
-                axios.post("/so/takeInStorage", row).then((res) => {
-                    if (res.data.flag) {
-                        this.$message.success("入库成功")
-                    } else {
-                        this.$message.error("入库失败")
-                    }
-                    this.pageQuery()
+                this.$confirm("确认出库？", "提示", {type: "info"}).then(() => {
+                    axios.post("/so/takeInStorage", row).then((res) => {
+                        if (res.data.flag) {
+                            this.$message.success("入库成功")
+                        } else {
+                            this.$message.error("入库失败")
+                        }
+                        this.pageQuery()
+                    })
                 })
+
             }
             ,
             //跳转

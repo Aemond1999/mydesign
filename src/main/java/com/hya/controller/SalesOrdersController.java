@@ -84,7 +84,6 @@ public class SalesOrdersController {
             so.setStatus(true);
             queryWrapper.eq("so_id", so.getSoId());
             salesOrdersService.update(so, queryWrapper);
-
             return new R(finishedProductService.updateBatchById(finishedProducts));
         } else {
             return new R(false);

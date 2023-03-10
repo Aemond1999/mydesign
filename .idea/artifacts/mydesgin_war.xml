@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="mydesgin:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>mydesgin</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="mydesgin.war">
+      <element id="artifact" artifact-name="mydesgin:war exploded" />
+    </root>
+  </artifact>
+</component>
